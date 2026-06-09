@@ -3,7 +3,11 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # Triggers the workflow when you push to the main branch
+      - main
+
+# Opt into Node.js 24 for runner actions to clear the warning
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
@@ -21,11 +25,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # Navigate to your project directory on the server
             cd /www/wwwroot/default/project
-            
-            # Pull the latest changes from Git
             git pull origin main
-            
-            # Rebuild and restart the containers without downtime
             docker compose up --build -d
