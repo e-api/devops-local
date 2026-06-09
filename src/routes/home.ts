@@ -1,13 +1,20 @@
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
+import { db } from '../db';
+import { productsTable } from '../db/schema';
 
 export const homeRoutes = new Elysia({ prefix: '/api' })
-  .get('/products', () => {
-    return [
-      { id: 1, name: "Wireless Mouse", price: 29.99 },
-      { id: 2, name: "Mechanical Keyboard", price: 79.99 },
-      { id: 3, name: "USB-C Hub", price: 19.99 }
-    ];
+  .get('/products', async () => {
+    // Select all products from the postgres database
+    return await db.select().from(productsTable);
   })
-  .get('/products/:id', ({ params: { id } }) => {
-    return { id: Number(id), name: "Sample Product", price: 29.99, description: "Detailed description of product." };
+  .post('/products', async ({ body }) => {
+    // Insert new product and return the inserted row
+    const result = await db.insert(productsTable).values(body).returning();
+    return { success: true, product: result[0] };
+  }, {
+    body: t.Object({
+      name: t.String(),
+      price: t.Number(),
+      stock: t.Number()
+    })
   });

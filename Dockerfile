@@ -4,12 +4,15 @@ WORKDIR /app
 # Copy only package.json
 COPY package.json ./
 
-# Run a standard install (allows Bun to generate a clean, local dependency tree)
+# Run standard install (Drizzle needs development packages like drizzle-kit to push schemas)
 RUN bun install
 
 # Copy the rest of the application files
 COPY src ./src
 COPY tsconfig.json ./
+COPY drizzle.config.ts ./
 
 EXPOSE 3000
-ENTRYPOINT [ "bun", "run", "src/index.ts" ]
+
+# DevOps Pattern: Push the schema to DB first, then start the server
+ENTRYPOINT [ "sh", "-c", "bunx drizzle-kit push && bun run src/index.ts" ]
