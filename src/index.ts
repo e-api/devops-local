@@ -8,8 +8,9 @@ import { adminRoutes } from './routes/admin';
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:securepassword@localhost:5432/ecommerce';
 const pool = new Pool({ connectionString });
 
-// Self-Healing: Automatically create the table if it does not exist on startup
+// Self-Healing: Automatically initialize both tables on startup
 try {
+  // Create products table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
@@ -18,6 +19,17 @@ try {
       stock INTEGER NOT NULL DEFAULT 0
     );
   `);
+
+  // Create users table
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+  
   console.log("Database tables initialized successfully.");
 } catch (error) {
   console.error("Failed to initialize database tables:", error);
@@ -25,10 +37,7 @@ try {
 
 const app = new Elysia()
   .use(cors())
-  
-  // Basic health check
   .get('/health', () => ({ status: 'healthy', timestamp: new Date().toISOString() }))
-
   .use(homeRoutes)
   .use(userRoutes)
   .use(adminRoutes)
