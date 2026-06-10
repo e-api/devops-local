@@ -15,4 +15,4 @@ COPY drizzle.config.ts ./
 EXPOSE 3000
 
 # DevOps Pattern: Push the schema to DB first, then start the server
-ENTRYPOINT [ "sh", "-c", "bunx drizzle-kit push && bun run src/index.ts" ]
+ENTRYPOINT [ "bun", "run", "src/index.ts" ]
