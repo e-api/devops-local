@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api-server
+    container_name: ecommerce-api
     ports:
       - "${API_PORT}:3000"
     environment:
@@ -12,12 +12,18 @@ services:
     depends_on:
       - db
     networks:
-      - baota_net 
+      - baota_net
     restart: always
+    # ADDED: Log rotation limits
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   db:
     image: postgres:15-alpine
-    container_name: postgres-db
+    container_name: ecommerce-db
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -27,6 +33,12 @@ services:
     networks:
       - baota_net
     restart: always
+    # ADDED: Log rotation limits
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:
